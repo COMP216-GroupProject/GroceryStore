@@ -3,7 +3,7 @@ import datetime
 
 db_connection = None
 
-def get_sql_connection():
+def getSqlConnection():
     global db_connection;
     print("establishing connection to mysql db");
 
