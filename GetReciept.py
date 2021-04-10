@@ -66,7 +66,7 @@ def showOrderSummmary(canvas):
 
     y += 40
     x += 280
-    itemNamelbl = tk.Label(canvas, text=("Order Total : $" + str(total)), fg='red',
+    itemNamelbl = tk.Label(canvas, text=("Order Total : ", total), fg='red',
                            font=("Helvetica", 14))
     itemNamelbl.place(x=x, y=y)
 
