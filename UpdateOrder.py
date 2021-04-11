@@ -1,17 +1,19 @@
 import tkinter as tk
 from sqlite3 import dbapi2 as sqlite
 import sqlite3
-from tkinter import PhotoImage, filedialog, Text
+from tkinter import PhotoImage, filedialog, Text, StringVar, OptionMenu
 from tkinter.constants import END, NW
 
 conn = sqlite3.connect("groceries.db")
 c = conn.cursor()
 
+selected_s = ""
+
 
 def backToMain():
     root.destroy()
-    import GroceryAppMainPage
-    backToMainPage = GroceryAppMainPage.openAgain()
+    # import GroceryAppMainPage
+    # backToMainPage = GroceryAppMainPage.openAgain()
     openAgain()
     c.close()
 
@@ -35,11 +37,11 @@ def clear():
 # on submit button click
 def submit():
     # if all text fields are filled
-    if itemNameField.index(("end")) != 0 and itemPriceField.index(("end")) != 0 and itemQTYfield.index(("end")) != 0:
-        userEntryItemName = itemNameField.get()
+    if itemPriceField.index(("end")) != 0 and itemQTYfield.index(("end")) != 0:
+        userEntryItemName = selected.get()
         userEntryItemQTY = itemQTYfield.get()
         userEntryItemPrice = itemPriceField.get()
-        print('lastrowid: ', insertNewRow(userEntryItemName, userEntryItemQTY, userEntryItemPrice))
+        print('lastrowid: ', updateRow(userEntryItemName, userEntryItemQTY, userEntryItemPrice))
         sqlite_select_query = """SELECT * from groceries"""
 
         c.execute(sqlite_select_query)
@@ -63,27 +65,39 @@ def submit():
         print("ONE FIELD IS EMPTY")
 
 
-def insertNewRow(itemm_name, item_qty, price):
+def updateRow(itemm_name, item_qty, price):
     item_price = int(item_qty) * float(price)
-    sql_insert_statement = "INSERT INTO groceries (ITEM_NAME, ITEM_QUANTITY, ITEM_PRICE) values (?, ?, ?)"
-    data_tuple = (itemm_name, item_qty, item_price)
+    print("quanitity", item_qty)
+    print("price", item_price)
+    print("name", itemm_name[2:-3])
+    sql_insert_statement = "UPDATE groceries SET ITEM_QUANTITY=?, ITEM_PRICE=? WHERE ITEM_NAME=?"
+    data_tuple = (item_qty, item_price, itemm_name[2:-3])
     c.execute(sql_insert_statement, data_tuple)
     conn.commit()
 
     return c.lastrowid
+
 
 def remove():
-    
-    removeItem(itemNameField.get(),itemQTYfield.get(),itemPriceField.get())
+    print("".join(selected.get()))
+    selected_s = "".join(selected.get())
+    selected_s = selected_s[2:-3]
+    print(selected_s)
+    removeItem(selected_s)
 
-def removeItem(itemm_name, item_qty, price):
-    item_price = int(item_qty) * float(price)
-    sql_insert_statement = "DELETE FROM groceries (ITEM_NAME, ITEM_QUANTITY, ITEM_PRICE) values (?, ?, ?)"
-    data_tuple = (itemm_name, item_qty, item_price)
-    c.execute(sql_insert_statement, data_tuple)
+
+def removeItem(itemm_name):
+    sql_insert_statement = "DELETE FROM groceries WHERE ITEM_NAME = ?"
+    c.execute(sql_insert_statement, ((itemm_name,)))
     conn.commit()
-    
+
     return c.lastrowid
+
+
+def callbacks(selection):
+    # selected_s = selected_s.join(selection)
+    print("string ".join(selection))
+    print(selection)
 
 
 root = tk.Tk()
@@ -93,6 +107,17 @@ canvas.pack()
 # Title Message To User Label
 lbl = tk.Label(canvas, text="Enter Item To Be Updated:", fg='black', font=("Helvetica", 15, "bold"))
 lbl.place(x=30, y=30)
+
+# Dropdown menu
+selected = StringVar(root)
+
+selected.set('')
+menuOptions = c.execute('SELECT ITEM_NAME FROM groceries').fetchall()
+it = iter(menuOptions)
+res_dct = dict(zip(it, it))
+popupMenu = OptionMenu(canvas, selected, *menuOptions, command=callbacks)
+##tk.Label(canvas, text="Item").grid(row = 1, column = 1)
+popupMenu.place(x=240, y=80)
 
 # First Text Field Label
 itemNamelbl = tk.Label(canvas, text="ITEM NAME:", fg='black', font=("Helvetica", 11))
@@ -105,8 +130,8 @@ itemPricelbl = tk.Label(canvas, text="ITEM PRICE:", fg='black', font=("Helvetica
 itemPricelbl.place(x=30, y=160)
 
 # First Text Field
-itemNameField = tk.Entry(canvas, textvariable='itemNameVar', bd=2)
-itemNameField.place(x=240, y=80)
+# itemNameField = tk.Entry(canvas, textvariable='itemNameVar', bd=2)
+# itemNameField.place(x=240, y=80)
 # Second Text Field
 itemQTYfield = tk.Entry(canvas, textvariable='itemQTYeVar', bd=2)
 itemQTYfield.place(x=240, y=120)

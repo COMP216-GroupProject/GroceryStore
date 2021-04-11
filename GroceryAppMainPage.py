@@ -8,8 +8,8 @@ conn = sqlite3.connect("groceries.db")
 c = conn.cursor()
 # If table doesnt exist it creates it
 try:
-    c.execute("""CREATE TABLE groceries (
-   ITEM_NAME TEXT,
+   c.execute("""CREATE TABLE groceries (
+   ITEM_NAME VARCHAR(50),
    ITEM_QUANTITY INTEGER,
    ITEM_PRICE REAL
    )""")
@@ -30,26 +30,36 @@ def setCurrentValue(newTotalPrice):
     currentTotalValue.set(str(newTotalPrice))
     return
 
+def updateTotal():
+    c.execute("SELECT SUM(ITEM_PRICE) FROM groceries")
+    [(totalPricesOfItems,)] = c.fetchall()
+    print(totalPricesOfItems)
+    #Set The price of the current item
+    if (totalPricesOfItems == None):
+        setCurrentValue(0)
+    else:
+        setCurrentValue(totalPricesOfItems)
 
 def openAgain():
     # make root visible again
     root.iconify()
     root.deiconify()
-
+    c.open()
 
 # on addToOrder button click
 def addToOrder():
-    root.destroy()
     import AddToOrderPage
     addOrderPage = AddToOrderPage.openAgain()
-    openAgain()
+    #openAgain()
     c.close()
 
 
 # on updateOrderButton button click
 def updateOrder():
-    tk.messagebox.showinfo("Add To Existing Order", "Order")
-
+    import UpdateOrder
+    updatePage = UpdateOrder.openAgain()
+    openAgain()
+    c.close()
 
 # on getBillButton button click
 def getBill():
@@ -58,7 +68,7 @@ def getBill():
     c.close()
 
 
-root = tk.Tk()
+root = tk.Toplevel()
 root.title("GROCERY STORE BILL CALCULATOR")
 canvas1 = tk.Canvas(root, heigh=700, width=683, bg="#263D42")
 canvas1.pack()
@@ -111,4 +121,5 @@ updateOrderButton.place(x=230, y=80)
 getBillButton = tk.Button(buttonFrame, text="Get Receipt", height=2, width=12, command=getBill)
 getBillButton.place(x=430, y=80)
 
+root.after(3000, updateTotal)
 root.mainloop()
