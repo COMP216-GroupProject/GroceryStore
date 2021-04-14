@@ -68,7 +68,7 @@ def getBill():
     c.close()
 
 
-root = tk.Toplevel()
+root = tk.Tk()
 root.title("GROCERY STORE BILL CALCULATOR")
 canvas1 = tk.Canvas(root, heigh=700, width=683, bg="#263D42")
 canvas1.pack()
